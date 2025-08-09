@@ -3,6 +3,7 @@ import pygame
 
 
 class Game:
+    """Основной класс-синглтон, управляет геймплеем и главной отрисовкой, инстанс доступен остальным через game_context.game"""
     def __init__(self):
         pygame.init()
         with open('configs/config.json', 'r', encoding='utf-8') as cf:
@@ -14,14 +15,16 @@ class Game:
         self.running = True
 
     def run(self):
+        """Обрабатывает игровой цикл"""
         while self.running:
             self.update()
             self.draw()
 
     def update(self):
-        pass
+        """Обновляет события и состояния скринов и игрока"""
 
     def draw(self):
+        """Отрисовывает screen на display. На screen рисуется все в FHD, display масштабируется под реальный размер окна"""
         screen_size = (self.config["screen_width"], self.config["screen_height"])
         aspect = self.config["base_resolution"][1] / self.config["base_resolution"][0]
         if screen_size[1] / screen_size[0] == aspect:
@@ -37,4 +40,5 @@ class Game:
         pygame.display.flip()
 
     def stop(self):
+        """Останавливает игровой цикл для выхода 'в меню', меню пока не делалось, если делать то запускать в main"""
         self.running = False
