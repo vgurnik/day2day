@@ -1,6 +1,8 @@
 import json
 import pygame
 
+from player import Player
+
 
 class Game:
     """Основной класс-синглтон, управляет геймплеем и главной отрисовкой, инстанс доступен остальным через game_context.game"""
@@ -13,6 +15,7 @@ class Game:
         self.screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
         self.current_screen = None
         self.running = True
+        self.player = Player(self.config["start_flags"])
 
     def run(self):
         """Обрабатывает игровой цикл"""
