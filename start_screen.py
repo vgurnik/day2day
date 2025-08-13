@@ -19,17 +19,19 @@ class StartButton:
         self.text_surf = font.render(text, True, "Black")
         self.text_rect = self.text_surf.get_rect(center=self.rect.center)
 
-    def draw(self, screen):
-        screen.blit(self.cur_img, self.rect)
-        screen.blit(self.text_surf, self.text_rect)
+    def draw(self, display):
+        display.blit(self.cur_img, self.rect)
+        display.blit(self.text_surf, self.text_rect)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
                 self.cur_img = self.img_pressed
                 self.pressed = True
+                self.text_rect.move_ip(0, 5)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             if self.pressed:
+                self.text_rect.move_ip(0, -5)
                 if self.rect.collidepoint(event.pos) and self.action:
                     self.action()
             self.pressed = False
@@ -37,18 +39,18 @@ class StartButton:
 
 
 class VolumeBar:
-    def __init__(self, x, y, bar_width, bar_height, gap, text, font, volume_level=5, volume_max=10):
+    def __init__(self, x, y, bar_width, bar_height, gap, text, font, config, volume_max=10):
         self.x = x
         self.y = y
         self.bar_width = bar_width
         self.bar_height = bar_height
         self.gap = gap
         self.volume_max = volume_max
-        self.volume_level = volume_level
         self.rect = None
         self.text_surf = font.render(text, True, "Black")
+        self.config = config
 
-        pygame.mixer.music.set_volume(self.volume_level / self.volume_max)
+        pygame.mixer.music.set_volume(self.config["volume_level"] / self.volume_max)
 
     def draw(self, screen):
         for i in range(self.volume_max):
@@ -58,13 +60,13 @@ class VolumeBar:
                 self.bar_width,
                 self.bar_height
             )
-            if i < self.volume_level:
-                pygame.draw.rect(screen, (200, 0, 0), self.rect)
+            if i < self.config["volume_level"]:
+                pygame.draw.rect(screen, self.config["volume_bar_color"], self.rect)
             else:
-                pygame.draw.rect(screen, (100, 100, 100), self.rect, 2)
+                pygame.draw.rect(screen, "Black", self.rect, self.config["volume_bar_border"])
         total_width = self.volume_max * self.bar_width + (self.volume_max - 1) * self.gap
         text_x = self.x + (total_width - self.text_surf.get_width()) // 2
-        text_y = self.y + self.bar_height + 10
+        text_y = self.y + self.bar_height + self.gap
         screen.blit(self.text_surf, (text_x, text_y))
 
     def handle_event(self, event):
@@ -78,8 +80,8 @@ class VolumeBar:
                     self.bar_height
                 )
                 if self.rect.collidepoint(mx, my):
-                    self.volume_level = i + 1
-                    pygame.mixer.music.set_volume(self.volume_level / self.volume_max)
+                    self.config["volume_level"] = i + 1
+                    pygame.mixer.music.set_volume(self.config["volume_level"] / self.volume_max)
                     break
 
 
@@ -182,7 +184,8 @@ class SettingsScreen:
             bar_height=config["volume_bar_height"],
             gap=config["volume_bar_gap"],
             text=config["volume_bar_text"],
-            font=self.font
+            font=self.font,
+            config=self.config
         ))
 
         self.running = True

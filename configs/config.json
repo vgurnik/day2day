@@ -20,8 +20,12 @@
   "btn_text_settings": "Настройки",
   "btn_text_exit": "Выход",
   "btn_text_back": "Назад",
+
   "volume_bar_width": 40,
   "volume_bar_height": 60,
   "volume_bar_gap": 6,
-  "volume_bar_text": "Громкость"
+  "volume_bar_text": "Громкость",
+  "volume_bar_border": 5,
+  "volume_bar_color": [170, 0, 0],
+  "volume_level": 5
 }
