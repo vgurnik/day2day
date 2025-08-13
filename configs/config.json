@@ -5,5 +5,11 @@
   "fullscreen": false,
   "start_flags": {
 
-  }
+  },
+
+  "bg_img_start": "assets/backgrounds/menu.png",
+  "font": "assets/fonts/Pacifico-Regular.ttf",
+  "font_size_start": 36,
+  "but_img_norm_start": "assets/animations/button/button1.png",
+  "but_img_press_start": "assets/animations/button/button2.png"
 }

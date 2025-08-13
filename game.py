@@ -6,12 +6,9 @@ from player import Player
 
 class Game:
     """Основной класс-синглтон, управляет геймплеем и главной отрисовкой, инстанс доступен остальным через game_context.game"""
-    def __init__(self):
-        pygame.init()
-        with open('configs/config.json', 'r', encoding='utf-8') as cf:
-            self.config = json.load(cf)
-        self.display = pygame.display.set_mode((self.config["screen_width"], self.config["screen_height"]),
-                                               (pygame.FULLSCREEN if self.config["fullscreen"] else 0))
+    def __init__(self, display, config):
+        self.display = display
+        self.config = config
         self.screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
         self.current_screen = None
         self.running = True
