@@ -1,5 +1,8 @@
+import time
 import pygame
+from game import Game
 import sys
+
 
 class StartButton:
     def __init__(self, x, y, text, font, img_normal, img_pressed, action=None):
@@ -22,33 +25,203 @@ class StartButton:
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.cur_img = self.img_pressed
-            self.pressed = True
+            if self.rect.collidepoint(event.pos):
+                self.cur_img = self.img_pressed
+                self.pressed = True
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            if self.pressed and self.rect.collidepoint(event.pos):
-                self.action()
+            if self.pressed:
+                if self.rect.collidepoint(event.pos) and self.action:
+                    self.action()
             self.pressed = False
             self.cur_img = self.img_normal
 
 
+class VolumeBar:
+    def __init__(self, x, y, bar_width, bar_height, gap, text, font, volume_level=5, volume_max=10):
+        self.x = x
+        self.y = y
+        self.bar_width = bar_width
+        self.bar_height = bar_height
+        self.gap = gap
+        self.volume_max = volume_max
+        self.volume_level = volume_level
+        self.rect = None
+        self.text_surf = font.render(text, True, "Black")
+
+        pygame.mixer.music.set_volume(self.volume_level / self.volume_max)
+
+    def draw(self, screen):
+        for i in range(self.volume_max):
+            self.rect = pygame.Rect(
+                self.x + i * (self.bar_width + self.gap),
+                self.y,
+                self.bar_width,
+                self.bar_height
+            )
+            if i < self.volume_level:
+                pygame.draw.rect(screen, (200, 0, 0), self.rect)
+            else:
+                pygame.draw.rect(screen, (100, 100, 100), self.rect, 2)
+        total_width = self.volume_max * self.bar_width + (self.volume_max - 1) * self.gap
+        text_x = self.x + (total_width - self.text_surf.get_width()) // 2
+        text_y = self.y + self.bar_height + 10
+        screen.blit(self.text_surf, (text_x, text_y))
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mx, my = event.pos
+            for i in range(self.volume_max):
+                self.rect = pygame.Rect(
+                    self.x + i * (self.bar_width + self.gap),
+                    self.y,
+                    self.bar_width,
+                    self.bar_height
+                )
+                if self.rect.collidepoint(mx, my):
+                    self.volume_level = i + 1
+                    pygame.mixer.music.set_volume(self.volume_level / self.volume_max)
+                    break
+
+
 class StartScreen:
     def __init__(self, display, config):
-        self.bg_image = pygame.image.load(config["bg_img_start"])
+        self.bg_image = pygame.image.load(config["bg_img"])
         self.buttons = []
         self.display = display
         self.config = config
         self.font = pygame.font.Font(config["font"], config["font_size_start"])
-        self.but_img_normal = pygame.image.load(config["but_img_norm_start"])
-        self.but_img_pressed = pygame.image.load(config["but_img_norm_start"])
+
+        normal = pygame.image.load(config["btn_img_norm_start"])
+        pressed = pygame.image.load(config["btn_img_press_start"])
+        btn_width, btn_height = normal.get_size()
+        self.btn_img_normal = pygame.transform.scale(normal, (int(btn_width*1.5), int(btn_height*1.5)))
+        self.btn_img_pressed = pygame.transform.scale(pressed, (int(btn_width*1.5), int(btn_height*1.5)))
+
+        self.add_button(StartButton(
+            x=config["btn_x"],
+            y=config["btn_y_1"],
+            text=config["btn_text_play"],
+            font=self.font,
+            img_normal=self.btn_img_normal,
+            img_pressed=self.btn_img_pressed,
+            action=lambda: btn_play_action(self.display, self.config)
+        ))
+        self.add_button(StartButton(
+            x=config["btn_x"],
+            y=config["btn_y_2"],
+            text=config["btn_text_settings"],
+            font=self.font,
+            img_normal=self.btn_img_normal,
+            img_pressed=self.btn_img_pressed,
+            action=lambda: btn_settings_action(self.display, self.config)
+        ))
+        self.add_button(StartButton(
+            x=config["btn_x"],
+            y=config["btn_y_3"],
+            text=config["btn_text_exit"],
+            font=self.font,
+            img_normal=self.btn_img_normal,
+            img_pressed=self.btn_img_pressed,
+            action=lambda: btn_exit_action(self)
+        ))
+
+        self.running = True
+
 
     def add_button(self, button):
         self.buttons.append(button)
 
-    def draw(self, screen):
-        screen.blit(self.bg_image, (0,0))
+    def draw(self):
+        self.display.blit(self.bg_image, (0,0))
         for btn in self.buttons:
-            btn.draw(screen)
+            btn.draw(self.display)
+        pygame.display.flip()
 
     def handle_event(self, event):
+        if event.type == pygame.QUIT:
+            btn_exit_action(self)
         for btn in self.buttons:
             btn.handle_event(event)
+
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                self.handle_event(event)
+            self.draw()
+            time.sleep(0.01)
+
+
+class SettingsScreen:
+    def __init__(self, display, config):
+        self.display = display
+        self.config = config
+        self.widgets = []
+        self.font = pygame.font.Font(config["font"], config["font_size_start"])
+        self.bg_image = pygame.image.load(config["bg_img"])
+
+        normal = pygame.image.load(config["btn_img_norm_start"])
+        pressed = pygame.image.load(config["btn_img_press_start"])
+        btn_width, btn_height = normal.get_size()
+        self.btn_img_normal = pygame.transform.scale(normal, (btn_width * 1.5, btn_height * 1.5))
+        self.btn_img_pressed = pygame.transform.scale(pressed, (btn_width * 1.5, btn_height * 1.5))
+
+        self.add_widget(StartButton(
+            x=config["btn_x"],
+            y=config["btn_y_2"],
+            text=config["btn_text_back"],
+            font=self.font,
+            img_normal=self.btn_img_normal,
+            img_pressed=self.btn_img_pressed,
+            action=lambda: btn_back_action(self)
+        ))
+
+        self.add_widget(VolumeBar(
+            x=config["btn_x"],
+            y=config["btn_y_1"],
+            bar_width=config["volume_bar_width"],
+            bar_height=config["volume_bar_height"],
+            gap=config["volume_bar_gap"],
+            text=config["volume_bar_text"],
+            font=self.font
+        ))
+
+        self.running = True
+
+    def add_widget(self, widget):
+        self.widgets.append(widget)
+
+    def draw(self):
+        self.display.blit(self.bg_image, (0, 0))
+        for wg in self.widgets:
+            wg.draw(self.display)
+        pygame.display.flip()
+
+    def handle_event(self, event):
+        if event.type == pygame.QUIT:
+            btn_exit_action(self)
+        for wg in self.widgets:
+            wg.handle_event(event)
+
+    def run(self):
+        while self.running:
+            for event in pygame.event.get():
+                self.handle_event(event)
+            self.draw()
+            time.sleep(0.01)
+
+def btn_play_action(display, config):
+    import game_context
+    game_context.game = Game(display, config)
+    game_context.game.run()
+
+def btn_settings_action(display, config):
+    settings_screen = SettingsScreen(display, config)
+    settings_screen.run()
+
+def btn_back_action(screen_obj):
+    screen_obj.running = False
+
+def btn_exit_action(screen_obj):
+    screen_obj.running = False
+    pygame.quit()
+    sys.exit(0)

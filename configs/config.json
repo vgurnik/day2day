@@ -7,9 +7,21 @@
 
   },
 
-  "bg_img_start": "assets/backgrounds/menu.png",
+  "bg_img": "assets/backgrounds/menu.png",
   "font": "assets/fonts/Pacifico-Regular.ttf",
   "font_size_start": 36,
-  "but_img_norm_start": "assets/animations/button/button1.png",
-  "but_img_press_start": "assets/animations/button/button2.png"
+  "btn_img_norm_start": "assets/animations/button/button1.png",
+  "btn_img_press_start": "assets/animations/button/button2.png",
+  "btn_y_1": 124,
+  "btn_y_2": 442,
+  "btn_y_3": 760,
+  "btn_x": 730,
+  "btn_text_play": "Игра",
+  "btn_text_settings": "Настройки",
+  "btn_text_exit": "Выход",
+  "btn_text_back": "Назад",
+  "volume_bar_width": 40,
+  "volume_bar_height": 60,
+  "volume_bar_gap": 6,
+  "volume_bar_text": "Громкость"
 }

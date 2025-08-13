@@ -1,4 +1,4 @@
-from game import Game
+from start_screen import StartScreen
 import pygame
 import json
 
@@ -8,6 +8,5 @@ if __name__ == "__main__":
         config = json.load(cf)
     display = pygame.display.set_mode((config["screen_width"], config["screen_height"]),
                                       (pygame.FULLSCREEN if config["fullscreen"] else 0))
-    import game_context
-    game_context.game = Game(display, config)
-    game_context.game.run()
+    start_menu = StartScreen(display, config)
+    start_menu.run()
