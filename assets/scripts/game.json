@@ -1,0 +1,16 @@
+{
+  "screens": {
+    "morning": {
+      "music": "assets/audio/...",
+      "elements": [
+        {
+          "name": "background",
+          "type": "visual",
+          "position": [0, 0],
+          "image": "assets/backgrounds/room.png"
+        }
+      ]
+    }
+  },
+  "first_screen": "morning"
+}

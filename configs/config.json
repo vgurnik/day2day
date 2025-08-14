@@ -1,11 +1,13 @@
 {
   "base_resolution": [1920, 1080],
-  "screen_width": 1920,
-  "screen_height": 1080,
+  "screen_width": 960,
+  "screen_height": 480,
   "fullscreen": false,
   "start_flags": {
 
   },
+
+  "script": "assets/scripts/game.json",
 
   "bg_img": "assets/backgrounds/menu.png",
   "font": "assets/fonts/Pacifico-Regular.ttf",

@@ -1,9 +1,12 @@
+import pygame
 import game_context
 
 
 class Visual:
     """Базовый класс для визуальных элементов"""
-    def __init__(self, sprite_dict, default=None):
+    def __init__(self, position, sprite_dict, default=None):
+        self.active = True
+        self.position = position
         if isinstance(sprite_dict, dict):
             self.sprites = sprite_dict
             self.sprite = sprite_dict[default]
@@ -16,12 +19,12 @@ class Visual:
 
     def draw(self, surface):
         """Отрисовывает визуальный элемент на заданном surface"""
-        pass
+        surface.blit(self.sprite, self.position)
 
 
 class ScreenArea:
     """Базовый класс для определения интерактивной области экрана"""
-    def __init__(self, mask, mask_color, visual, active=False):
+    def __init__(self, mask, mask_color, visual, active=True):
         # Наверное маску взаимодействия можно сделать для каждого экрана цветной картинкой с зонами
         self.mask = mask == mask_color
         self.active = active
@@ -42,8 +45,8 @@ class ScreenArea:
 
 class Button(ScreenArea):
     """Кнопка, которая может быть нажата"""
-    def __init__(self, mask, mask_color, action):
-        super().__init__(mask, mask_color)
+    def __init__(self, mask, mask_color, visual, action):
+        super().__init__(mask, mask_color, visual)
         self.action = action  # Действие при нажатии кнопки
 
     def click(self):
@@ -51,39 +54,24 @@ class Button(ScreenArea):
         pass
 
 
-class Transition(ScreenArea):
-    """Переход на другой экран по клику"""
-    def __init__(self, mask, mask_color, new_screen):
-        super().__init__(mask, mask_color)
-        self.new_screen = new_screen  # Действие при нажатии кнопки
-
-    def click(self):
-        """Переход на новый экран"""
-        pass
+def load_elements(resources):
+    """Загружает элемент из словаря ресурсов, возвращает объект соответствующего класса"""
+    elements = {}
+    for element in resources:
+        if element['type'] == 'visual':
+            image = pygame.image.load(element['image'])
+            elements[element['name']] = Visual(element['position'], image)
+        elif element['type'] == 'button':
+            button_visual = Visual(element['position'], element['image'])
+            elements[element['name']] = Button(element['mask'], element['mask_color'], button_visual, element['action'])
+    return elements
 
 
 class BaseGameScreen:
     """Базовый класс для экранов игры, содержит основные методы и атрибуты, которые могут быть переопределены в наследниках если надо будет"""
-    def __init__(self):
+    def __init__(self, resources):
         self.is_active = False
-        self.buttons = []
-        self.transitions = []
-        self.pickups = []
-        self.interactables = []
-        self._visuals = []
-
-    def load(self, resources):
-        """Загружает ресурсы для экрана из словаря
-        buttons - кнопки, т.е. можно нажать и что-то произойдет
-        transitions - переходы, по нажатию перейти на другой экран
-        pickups - предметы, которые можно подобрать
-        interactables - места куда можно применить предмет
-        visuals - визуальные элементы, которые просто отрисовываются на экране включая фон и аниматоры"""
-        self.buttons = resources.get("buttons", [])
-        self.transitions = resources.get("transitions", [])
-        self.pickups = resources.get("pickups", [])
-        self.interactables = resources.get("interactables", [])
-        self._visuals = resources.get("visuals", [])
+        self.elements = load_elements(resources["elements"])
 
     def activate(self):
         """Запустить экран, активировать все элементы которые нужно"""
@@ -93,13 +81,14 @@ class BaseGameScreen:
         """Деактивировать экран"""
         self.is_active = False
 
-    def update(self, delta_time):
+    def update(self, dt):
         """Обновить состояние экрана, активировать и деактивировать элементы, обработать события"""
 
     def draw(self):
         """Отрисовать экран на Game.screen"""
         g = game_context.game
         g.screen.fill((0, 0, 0, 0))
-        for visual in self._visuals:
-            g.screen.blit(visual.image, visual.rect)
+        for element in self.elements.values():
+            if element.active:
+                element.draw(g.screen)
         ...

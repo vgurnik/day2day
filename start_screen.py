@@ -1,7 +1,9 @@
 import time
 import pygame
-from game import Game
 import sys
+
+from game import Game
+from utils import render, get_mouse
 
 
 class StartButton:
@@ -106,7 +108,7 @@ class StartScreen:
             font=self.font,
             img_normal=self.btn_img_normal,
             img_pressed=self.btn_img_pressed,
-            action=lambda: btn_play_action(self.display, self.config)
+            action=lambda: btn_play_action(self)
         ))
         self.add_button(StartButton(
             x=config["btn_x"],
@@ -115,7 +117,7 @@ class StartScreen:
             font=self.font,
             img_normal=self.btn_img_normal,
             img_pressed=self.btn_img_pressed,
-            action=lambda: btn_settings_action(self.display, self.config)
+            action=lambda: btn_settings_action(self)
         ))
         self.add_button(StartButton(
             x=config["btn_x"],
@@ -134,9 +136,12 @@ class StartScreen:
         self.buttons.append(button)
 
     def draw(self):
-        self.display.blit(self.bg_image, (0,0))
+        screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
+        screen.blit(self.bg_image, (0,0))
         for btn in self.buttons:
-            btn.draw(self.display)
+            btn.draw(screen)
+        render(self.display, screen, self.config["base_resolution"],
+               (self.config["screen_width"], self.config["screen_height"]))
         pygame.display.flip()
 
     def handle_event(self, event):
@@ -194,9 +199,12 @@ class SettingsScreen:
         self.widgets.append(widget)
 
     def draw(self):
-        self.display.blit(self.bg_image, (0, 0))
+        screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
+        screen.blit(self.bg_image, (0, 0))
         for wg in self.widgets:
-            wg.draw(self.display)
+            wg.draw(screen)
+        render(self.display, screen, self.config["base_resolution"],
+               (self.config["screen_width"], self.config["screen_height"]))
         pygame.display.flip()
 
     def handle_event(self, event):
@@ -212,13 +220,14 @@ class SettingsScreen:
             self.draw()
             time.sleep(0.01)
 
-def btn_play_action(display, config):
+def btn_play_action(main_screen):
     import game_context
-    game_context.game = Game(display, config)
+    game_context.game = Game(main_screen.display, main_screen.config)
+    main_screen.running = False
     game_context.game.run()
 
-def btn_settings_action(display, config):
-    settings_screen = SettingsScreen(display, config)
+def btn_settings_action(main_screen):
+    settings_screen = SettingsScreen(main_screen.display, main_screen.config)
     settings_screen.run()
 
 def btn_back_action(screen_obj):
