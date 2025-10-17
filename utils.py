@@ -1,8 +1,8 @@
 import pygame
 
-def get_mouse(base_res, current_res):
+def get_mouse(base_res, current_res, mouse_pos=None):
     """Возвращает позицию мыши в координатах внутреннего разрешения"""
-    mouse_pos = pygame.mouse.get_pos()
+    mouse_pos = mouse_pos or pygame.mouse.get_pos()
     return (round(mouse_pos[0] / current_res[0] * base_res[0]),
             round(mouse_pos[1] / current_res[1] * base_res[1]))
 

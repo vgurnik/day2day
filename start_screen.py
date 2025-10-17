@@ -7,6 +7,7 @@ from utils import render, get_mouse
 
 
 class StartButton:
+    """Кнопка для стартового меню"""
     def __init__(self, x, y, text, font, img_normal, img_pressed, action=None):
         self.x = x
         self.y = y
@@ -22,10 +23,12 @@ class StartButton:
         self.text_rect = self.text_surf.get_rect(center=self.rect.center)
 
     def draw(self, display):
+        """Рисует кнопку на display"""
         display.blit(self.cur_img, self.rect)
         display.blit(self.text_surf, self.text_rect)
 
     def handle_event(self, event):
+        """Обрабатывает события мыши для кнопки"""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
                 self.cur_img = self.img_pressed
@@ -41,6 +44,7 @@ class StartButton:
 
 
 class VolumeBar:
+    """Полоса громкости для настроек"""
     def __init__(self, x, y, bar_width, bar_height, gap, text, font, config, volume_max=10):
         self.x = x
         self.y = y
@@ -55,6 +59,7 @@ class VolumeBar:
         pygame.mixer.music.set_volume(self.config["volume_level"] / self.volume_max)
 
     def draw(self, screen):
+        """Рисует полосу громкости на screen"""
         for i in range(self.volume_max):
             self.rect = pygame.Rect(
                 self.x + i * (self.bar_width + self.gap),
@@ -72,6 +77,7 @@ class VolumeBar:
         screen.blit(self.text_surf, (text_x, text_y))
 
     def handle_event(self, event):
+        """Обрабатывает события мыши для полосы громкости"""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
             for i in range(self.volume_max):
@@ -88,6 +94,7 @@ class VolumeBar:
 
 
 class StartScreen:
+    """Стартовое меню с кнопками"""
     def __init__(self, display, config):
         self.bg_image = pygame.image.load(config["bg_img"])
         self.buttons = []
@@ -133,9 +140,11 @@ class StartScreen:
 
 
     def add_button(self, button):
+        """Добавляет кнопку в меню"""
         self.buttons.append(button)
 
     def draw(self):
+        """Рисует меню на display. На screen рисуется все в FHD, display масштабируется под реальный размер окна"""
         screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
         screen.blit(self.bg_image, (0,0))
         for btn in self.buttons:
@@ -145,12 +154,14 @@ class StartScreen:
         pygame.display.flip()
 
     def handle_event(self, event):
+        """Обрабатывает события мыши для меню"""
         if event.type == pygame.QUIT:
             btn_exit_action(self)
         for btn in self.buttons:
             btn.handle_event(event)
 
     def run(self):
+        """Обрабатывает цикл меню"""
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
@@ -159,6 +170,7 @@ class StartScreen:
 
 
 class SettingsScreen:
+    """Экран настроек с ползунком громкости и кнопкой назад"""
     def __init__(self, display, config):
         self.display = display
         self.config = config
@@ -196,9 +208,11 @@ class SettingsScreen:
         self.running = True
 
     def add_widget(self, widget):
+        """Добавляет виджет на экран настроек"""
         self.widgets.append(widget)
 
     def draw(self):
+        """Рисует экран настроек на display. На screen рисуется все в FHD, display масштабируется под реальный размер окна"""
         screen = pygame.Surface(self.config["base_resolution"], pygame.SRCALPHA)
         screen.blit(self.bg_image, (0, 0))
         for wg in self.widgets:
@@ -208,12 +222,14 @@ class SettingsScreen:
         pygame.display.flip()
 
     def handle_event(self, event):
+        """Обрабатывает события мыши для экрана настроек"""
         if event.type == pygame.QUIT:
             btn_exit_action(self)
         for wg in self.widgets:
             wg.handle_event(event)
 
     def run(self):
+        """Обрабатывает цикл экрана настроек"""
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
@@ -221,12 +237,14 @@ class SettingsScreen:
             time.sleep(0.01)
 
 def btn_play_action(main_screen):
+    """Запускает игру из стартового меню"""
     import game_context
     game_context.game = Game(main_screen.display, main_screen.config)
     main_screen.running = False
     game_context.game.run()
 
 def btn_settings_action(main_screen):
+    """Переходит на экран настроек из стартового меню"""
     settings_screen = SettingsScreen(main_screen.display, main_screen.config)
     settings_screen.run()
 
